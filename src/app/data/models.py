@@ -56,6 +56,8 @@ class Conference(Base):
     organizingCommittee = Column(String(255))
     internationalAdvisoryBoard = Column(String(255))
 
+    coordinator = relationship("User")
+
 
 class ConferenceEditorReviewer(Base):
     __tablename__ = 'conference_editors_reviewers'
