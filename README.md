@@ -15,8 +15,8 @@ cd conf-wms
 docker-compose up -d --build
 ```
 4. The FastAPI documentation is accessible at:
-   1. [Swagger UI](localhost:8002/docs)
-   2. [Alternative UI](localhost:8002/redoc)
+   1. [Swagger UI](http://localhost:8002/docs)
+   2. [Alternative UI](http://localhost:8002/redoc)
 
 ## Logs
 
