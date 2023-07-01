@@ -4,7 +4,7 @@ services:
   web:
     build: ./src
     volumes:
-      - ./src/:/usr/src/app/
+      - ./src/:/usr/src/app
     ports:
       - 8002:8000
     environment:
