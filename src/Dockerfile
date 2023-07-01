@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Copy requirements file
-COPY ./requirements.txt /usr/src/app/requirements.txt
+COPY requirements.txt /usr/src/app/requirements.txt
 
 # Install dependencies
 RUN set -eux \
@@ -28,7 +28,7 @@ COPY . /usr/src/app/
 ENV PYTHONPATH "${PYTHONPATH}:./app"
 
 # Copy entrypoint script
-COPY ./entrypoint.sh /usr/src/app/entrypoint.sh
+COPY entrypoint.sh /usr/src/app/entrypoint.sh
 RUN chmod +x /usr/src/app/entrypoint.sh
 
 # Set entrypoint
