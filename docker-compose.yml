@@ -4,7 +4,7 @@ services:
   web:
     build: ./src
     volumes:
-      - ./src/:/usr/src/app
+      - ./src:/usr/src/app
     ports:
       - 8002:8000
     environment:
@@ -17,7 +17,6 @@ services:
     image: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=conf-wms
     volumes:
       - mysql_data:/var/lib/mysql
       - mysql_config:/etc/mysql

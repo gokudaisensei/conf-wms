@@ -1,35 +1,32 @@
 FROM python:3.11.0
 
-# Set work directory
-WORKDIR /usr/src/app
-
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV PYTHONPATH "${PYTHONPATH}:/usr/src/app/app"
 
-# Copy requirements file
-COPY requirements.txt /usr/src/app/requirements.txt
-
-# Install dependencies
-RUN set -eux \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libssl-dev \
     libffi-dev \
     netcat \
-    python3-dev \
-    && pip install --upgrade pip setuptools wheel \
-    && pip install -r requirements.txt \
-    && rm -rf /root/.cache/pip
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy project
-COPY . /usr/src/app/
-ENV PYTHONPATH "${PYTHONPATH}:./app"
+# Set work directory
+WORKDIR /usr/src/app
 
-# Copy entrypoint script
-COPY entrypoint.sh /usr/src/app/entrypoint.sh
-RUN chmod +x /usr/src/app/entrypoint.sh
+# Copy requirements file and install dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
+
+# Make entrypoint script executable
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+# Copy the rest of the project
+COPY . .
 
 # Set entrypoint
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+ENTRYPOINT [ "/usr/src/app/entrypoint.sh" ]
+
