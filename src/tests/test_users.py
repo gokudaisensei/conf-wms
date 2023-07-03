@@ -98,7 +98,7 @@ def test_get_user_by_user_id(test_client: TestClient, db_session: Session):
     # Check the response data
     data = response.json()
     # Checking if the number of fields retrieved is 5
-    assert len(data) == 5
+    assert len(data) == 6
 
     # Clean up the test data from the database
     db_session.query(models.User).delete()
@@ -131,4 +131,4 @@ def test_get_current_user_information(test_client: TestClient, db_session: Sessi
     data = response.json()
     # Check the response status code
     assert response.status_code == status.HTTP_200_OK
-    assert len(data) == 5
+    assert len(data) == 6

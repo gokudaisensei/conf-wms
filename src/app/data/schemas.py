@@ -77,6 +77,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    enabled: Optional[bool]
 
 
 class UserUpdate(UserBase):
@@ -85,6 +86,7 @@ class UserUpdate(UserBase):
 
 class User(UserBase):
     userID: int
+    enabled: bool
 
     class Config:
         orm_mode = True

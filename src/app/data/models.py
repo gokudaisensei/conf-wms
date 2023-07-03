@@ -56,6 +56,7 @@ class User(Base):
     )
     institutionID: Mapped[Optional[int]] = mapped_column(BigInteger,
                                                          ForeignKey('institutions.institutionID'))
+    enabled: Mapped[bool] = mapped_column(default=False)
 
     institution: Mapped["Institution"] = relationship(
         "Institution", backref="users")
