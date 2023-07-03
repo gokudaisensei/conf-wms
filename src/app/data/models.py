@@ -1,3 +1,4 @@
+import datetime
 from sqlalchemy import BigInteger, Integer, String, Text, Boolean, DateTime, ForeignKey, Enum, and_
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import DeclarativeBase
@@ -29,16 +30,19 @@ class Institution(Base):
     membership: Mapped[Enum] = mapped_column(
         Enum('Choice1', 'Choice2'), nullable=False)
 
+    def __repr__(self):
+        return f"Institution(institutionID={self.institutionID}, institutionName='{self.institutionName}', institutionAddress='{self.institutionAddress}', emailID='{self.emailID}', contactNum='{self.contactNum}', membership='{self.membership}')"
+
 
 class User(Base):
     __tablename__ = 'users'
 
-    userID: Mapped[BigInteger] = mapped_column(BigInteger,
+    userID: Mapped[int] = mapped_column(BigInteger,
                                                primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[str] = mapped_column(String(255))
     email: Mapped[str] = mapped_column(
-        String(255), nullable=False, unique=True)
-    password: Mapped[str] = mapped_column(String(255), nullable=False)
+        String(255), unique=True)
+    password: Mapped[str] = mapped_column(String(255))
     roleID: Mapped[Optional[Enum]] = mapped_column(
         Enum(
             'SuperAdmin',
@@ -55,6 +59,9 @@ class User(Base):
 
     institution: Mapped["Institution"] = relationship(
         "Institution", backref="users")
+
+    def __repr__(self):
+        return f"User(userID={self.userID}, name='{self.name}', email='{self.email}', password='{self.password}', roleID={self.roleID}, institutionID={self.institutionID})"
 
 
 class Conference(Base):
@@ -105,6 +112,9 @@ class Conference(Base):
 
     submissions: Mapped[List["Submission"]] = relationship("Submission")
 
+    def __repr__(self):
+        return f"Conference(conferenceID={self.conferenceID}, conferenceTheme='{self.conferenceTheme}', inCharge={self.inCharge}, conferenceTrack='{self.conferenceTrack}', chairDesignation='{self.chairDesignation}', chairName='{self.chairName}', coChairDesignation='{self.coChairDesignation}', conferenceBoardDesignation='{self.conferenceBoardDesignation}', conferenceBoardName='{self.conferenceBoardName}', organizingCommittee='{self.organizingCommittee}', internationalAdvisoryBoard='{self.internationalAdvisoryBoard}')"
+
 
 class ConferenceEditor(Base):
     __tablename__ = 'conference_editors'
@@ -117,6 +127,9 @@ class ConferenceEditor(Base):
         BigInteger, ForeignKey(USER_ID), nullable=False, unique=True)
 
     editor: Mapped["User"] = relationship("User")
+
+    def __repr__(self):
+        return f"ConferenceEditor(conferenceEditorID={self.conferenceEditorID}, conferenceID={self.conferenceID}, editorID={self.editorID})"
 
 
 class ConferenceAssociateEditor(Base):
@@ -131,6 +144,9 @@ class ConferenceAssociateEditor(Base):
 
     associateEditor: Mapped["User"] = relationship("User")
 
+    def __repr__(self):
+        return f"ConferenceAssociateEditor(conferenceAssociateEditorID={self.conferenceAssociateEditorID}, conferenceID={self.conferenceID}, associateEditorID={self.associateEditorID})"
+
 
 class ConferenceReviewer(Base):
     __tablename__ = 'conference_reviewers'
@@ -143,6 +159,9 @@ class ConferenceReviewer(Base):
         BigInteger, ForeignKey(USER_ID), nullable=False, unique=True)
 
     reviewer: Mapped["User"] = relationship("User")
+
+    def __repr__(self):
+        return f"ConferenceReviewer(conferenceReviewerID={self.conferenceReviewerID}, conferenceID={self.conferenceID}, reviewerID={self.reviewerID})"
 
 
 class ConferenceRoster(Base):
@@ -157,6 +176,9 @@ class ConferenceRoster(Base):
 
     author: Mapped["User"] = relationship("User")
 
+    def __repr__(self):
+        return f"ConferenceRoster(rosterID={self.rosterID}, conferenceID={self.conferenceID}, authorID={self.authorID})"
+
 
 class Paper(Base):
     __tablename__ = 'papers'
@@ -169,6 +191,9 @@ class Paper(Base):
     paperLink: Mapped[str] = mapped_column(String(255), nullable=False)
 
     author = relationship("ConferenceRoster")
+
+    def __repr__(self):
+        return f"Paper(paperID={self.paperID}, paperName='{self.paperName}', authorID={self.authorID}, paperLink='{self.paperLink}')"
 
 
 class Submission(Base):
@@ -184,108 +209,129 @@ class Submission(Base):
     submissionDeadline: Mapped[DateTime] = mapped_column(
         DateTime, nullable=False)
 
-    papers: Mapped[List["Paper"]] = relationship("Paper", backref="submission")
+    submittedPaper: Mapped[List["SubmittedPaper"]
+                           ] = relationship("SubmittedPaper", backref="submission")
+    papers: Mapped[List["Paper"]] = association_proxy(  # type: ignore
+        "submittedPaper", "paper", creator=lambda paper: SubmittedPaper(paper=paper))
+
+    def __repr__(self):
+        return f"Submission(submissionID={self.submissionID}, ifPubApplicable={self.ifPubApplicable}, plagPolicy={self.plagPolicy}, samplePaper='{self.samplePaper}', conferenceID={self.conferenceID}, submissionDeadline='{self.submissionDeadline}')"
 
 
-# class SubmittedPapers(Base):
-#     __tablename__ = 'submitted_papers'
+class SubmittedPaper(Base):
+    __tablename__ = 'submitted_papers'
 
-#     submissionID: Mapped[BigInteger] = mapped_column(ForeignKey(
-#         'submissions.submissionID'), nullable=False, primary_key=True)
-#     paperID: Mapped[BigInteger] = mapped_column(
-#         ForeignKey(PAPER_ID), nullable=False, primary_key=True)
+    submittedPaperID: Mapped[int] = mapped_column(
+        BigInteger, primary_key=True, autoincrement=True)
+    submissionID: Mapped[int] = mapped_column(BigInteger, ForeignKey(
+        'submissions.submissionID'), nullable=False, primary_key=True)
+    paperID: Mapped[BigInteger] = mapped_column(
+        ForeignKey(PAPER_ID), nullable=False, primary_key=True)
 
-#     submission = relationship("Submission")
-#     paper = relationship("Paper")
+    paper: Mapped["Paper"] = relationship("Paper")
 
-
-# class PaperRevision(Base):
-#     __tablename__ = 'paper_revisions'
-
-#     revisionID: Mapped[BigInteger] = mapped_column(
-#         primary_key=True, autoincrement=True)
-#     paperID: Mapped[BigInteger] = mapped_column(
-#         ForeignKey(PAPER_ID), nullable=False)
-#     revisionNumber: Mapped[int] = mapped_column(Integer, nullable=False)
-#     revisionLink: Mapped[str] = mapped_column(String(255), nullable=False)
-#     revisionDateTime: Mapped[DateTime] = mapped_column(
-#         DateTime, nullable=False)
-#     submissionID: Mapped[BigInteger] = mapped_column(
-#         ForeignKey('submitted_papers.submissionID'))
-
-#     paper = relationship("Paper")
+    def __repr__(self):
+        return f"SubmittedPaper(submittedPaperID={self.submittedPaperID}, submissionID={self.submissionID}, paperID={self.paperID})"
 
 
-# class PaperStatus(Base):
-#     __tablename__ = 'paper_status'
+class PaperRevision(Base):
+    __tablename__ = 'paper_revisions'
 
-#     statusID: Mapped[BigInteger] = mapped_column(
-#         primary_key=True, autoincrement=True)
-#     paperID: Mapped[BigInteger] = mapped_column(
-#         ForeignKey(PAPER_ID), nullable=False)
-#     isFinalRevision: Mapped[bool] = mapped_column(Boolean, default=False)
-#     toPublish: Mapped[bool] = mapped_column(Boolean, default=False)
-#     presentationStatus: Mapped[Enum] = mapped_column(
-#         Enum('Accept', 'Reject', 'Soft Accept', 'Soft Reject'))
+    revisionID: Mapped[int] = mapped_column(BigInteger,
+                                            primary_key=True, autoincrement=True)
+    revisionNumber: Mapped[int]
+    revisionLink: Mapped[str] = mapped_column(String(255))
+    revisionDateTime: Mapped[datetime.datetime] = mapped_column(DateTime)
+    submittedPaperID: Mapped[int] = mapped_column(BigInteger,
+                                                  ForeignKey('submitted_papers.submittedPaperID'))
 
-#     paper = relationship("Paper")
-
-
-# class Review(Base):
-#     __tablename__ = 'reviews'
-
-#     reviewID: Mapped[BigInteger] = mapped_column(
-#         primary_key=True, autoincrement=True)
-#     editorID: Mapped[BigInteger] = mapped_column(ForeignKey(
-#         'conference_editors_reviewers.editorID'), nullable=False)
-#     associateEditorID: Mapped[BigInteger] = mapped_column(
-#         ForeignKey('conference_editors_reviewers.associateEditorID'))
-#     reviewerID: Mapped[BigInteger] = mapped_column(ForeignKey(
-#         'conference_editors_reviewers.reviewerID'), nullable=False)
-#     revisionID: Mapped[BigInteger] = mapped_column(
-#         ForeignKey('paper_revisions.revisionID'), nullable=False)
-#     process: Mapped[Enum] = mapped_column(
-#         Enum('Single Blind Review', 'Double Blind Review'), nullable=False)
-#     reviewEndDeadline: Mapped[DateTime] = mapped_column(
-#         DateTime, nullable=False)
-
-#     editor = relationship("ConferenceEditorReviewer", foreign_keys=[editorID])
-#     associateEditor = relationship(
-#         "ConferenceEditorReviewer", foreign_keys=[associateEditorID])
-#     reviewer = relationship("ConferenceEditorReviewer",
-#                             foreign_keys=[reviewerID])
-#     revision = relationship("PaperRevision")
+    submittedPaper: Mapped["SubmittedPaper"] = relationship("SubmittedPaper")
+    paper: Mapped["Paper"] = association_proxy(  # type:ignore
+        "submittedPaper", "paper", creator=lambda paper: SubmittedPaper(paper=paper))
+    submission: Mapped["Paper"] = association_proxy(  # type:ignore
+        "submittedPaper", "submission", creator=lambda submission: SubmittedPaper(submission=submission))
 
 
-# class ReviewComment(Base):
-#     __tablename__ = 'review_comments'
+class PaperStatus(Base):
+    __tablename__ = 'paper_status'
 
-#     reviewCommentID: Mapped[BigInteger] = mapped_column(
-#         primary_key=True, autoincrement=True)
-#     reviewID: Mapped[BigInteger] = mapped_column(
-#         ForeignKey('reviews.reviewID'), nullable=False)
-#     comment: Mapped[Text] = mapped_column(Text)
-#     commentDateTime: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
+    statusID: Mapped[int] = mapped_column(BigInteger,
+                                          primary_key=True, autoincrement=True)
+    paperID: Mapped[BigInteger] = mapped_column(
+        ForeignKey(PAPER_ID))
+    isFinalRevision: Mapped[bool] = mapped_column(Boolean, default=False)
+    toPublish: Mapped[bool] = mapped_column(Boolean, default=False)
+    presentationStatus: Mapped[Enum] = mapped_column(
+        Enum('Accept', 'Reject', 'Soft Accept', 'Soft Reject'))
 
-#     review = relationship("Review")
+    paper = relationship("Paper")
 
 
-# class Event(Base):
-#     __tablename__ = 'events'
+class Review(Base):
+    __tablename__ = 'reviews'
 
-#     eventID: Mapped[BigInteger] = mapped_column(
-#         primary_key=True, autoincrement=True)
-#     eventName: Mapped[str] = mapped_column(
-#         String(255), nullable=False, unique=True)
-#     venue: Mapped[str] = mapped_column(String(255), nullable=False)
-#     regOpen: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
-#     regClose: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
-#     eventStart: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
-#     eventEnd: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
-#     maxParticipants: Mapped[int] = mapped_column(Integer, nullable=False)
-#     conferenceID: Mapped[BigInteger] = mapped_column(ForeignKey(CONFERENCE_ID))
+    reviewID: Mapped[int] = mapped_column(BigInteger,
+                                          primary_key=True, autoincrement=True)
+    editorID: Mapped[int] = mapped_column(BigInteger, ForeignKey(
+        'conference_editors.conferenceEditorID'))
+    associateEditorID: Mapped[Optional[int]] = mapped_column(BigInteger,
+                                                             ForeignKey('conference_associate_editors.conferenceAssociateEditorID'))
+    reviewerID: Mapped[int] = mapped_column(BigInteger, ForeignKey(
+        'conference_reviewers.conferenceReviewerID'))
+    revisionID: Mapped[int] = mapped_column(BigInteger,
+                                            ForeignKey('paper_revisions.revisionID'))
+    process: Mapped[Enum] = mapped_column(
+        Enum('Single Blind Review', 'Double Blind Review'))
+    reviewEndDeadline: Mapped[datetime.datetime] = mapped_column(
+        DateTime)
 
-#     conference = relationship("Conference")
+    reviewEditor: Mapped["ConferenceEditor"] = relationship(
+        "ConferenceEditor", uselist=False)
+    reviewAssociateEditor: Mapped["ConferenceAssociateEditor"] = relationship(
+        "ConferenceAssociateEditor", uselist=False)
+    reviewReviewer: Mapped["ConferenceReviewer"] = relationship(
+        "ConferenceReviewer", uselist=False)
+    editor: Mapped["User"] = association_proxy(
+        "reviewEditor", "editor", creator=lambda editor: ConferenceEditor(editor=editor))  # type: ignore
+    associateEditor: Mapped["User"] = association_proxy(
+        "reviewAssociateEditor", "associateEditor", creator=lambda associateEditor: ConferenceEditor(associateEditor=associateEditor))  # type: ignore
+    reviewer: Mapped["User"] = association_proxy(
+        "reviewReviewer", "reviewer", creator=lambda reviewer: ConferenceEditor(reviewer=reviewer))  # type: ignore
+
+    revision: Mapped["PaperRevision"] = relationship("PaperRevision")
+
+
+class ReviewComment(Base):
+    __tablename__ = 'review_comments'
+
+    reviewCommentID: Mapped[int] = mapped_column(BigInteger,
+        primary_key=True, autoincrement=True)
+    reviewID: Mapped[int] = mapped_column(BigInteger,
+        ForeignKey('reviews.reviewID'))
+    comment: Mapped[str] = mapped_column(Text)
+    commentDateTime: Mapped[datetime.datetime] = mapped_column(DateTime)
+
+    review: Mapped["Review"] = relationship("Review", backref="comments")
+
+
+class Event(Base):
+    __tablename__ = 'events'
+
+    eventID: Mapped[int] = mapped_column(BigInteger,
+                                         primary_key=True, autoincrement=True)
+    eventName: Mapped[str] = mapped_column(
+        String(255), nullable=False, unique=True)
+    venue: Mapped[str] = mapped_column(String(255))
+    regOpen: Mapped[datetime.datetime] = mapped_column(DateTime)
+    regClose: Mapped[datetime.datetime] = mapped_column(DateTime)
+    eventStart: Mapped[datetime.datetime] = mapped_column(DateTime)
+    eventEnd: Mapped[datetime.datetime] = mapped_column(DateTime)
+    maxParticipants: Mapped[Optional[int]]
+    conferenceID: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(CONFERENCE_ID))
+
+    conference: Mapped["Conference"] = relationship(
+        "Conference", backref='event', uselist=False)
 
 
 # class Journal(Base):

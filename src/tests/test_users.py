@@ -1,39 +1,16 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
+from fastapi import status
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from app.main import app
 from app.data import models, schemas
-from app.dependencies import get_db
+from app.dependencies import get_db, get_password_hash
 from random import choice
 
 from tests import create_users, ROLE_ENUM
-
-# Create an in-memory SQLite database for testing
-engine = create_engine(os.getenv('TESTING_DATABASE_URL'))  # type: ignore
-TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine)
-
-
-@pytest.fixture(scope="module")
-def test_client():
-    with TestClient(app) as client:
-        yield client
-
-
-@pytest.fixture(scope="module")
-def db_session():
-    # Create the test database tables
-    models.Base.metadata.create_all(bind=engine)
-
-    # Set up a test database session
-    session = TestingSessionLocal()
-
-    yield session
-
-    # Clean up the test database tables
-    models.Base.metadata.drop_all(bind=engine)
+from tests.conftest import db_session, test_client, TestingSessionLocal
 
 
 def override_get_db():
@@ -120,9 +97,38 @@ def test_get_user_by_user_id(test_client: TestClient, db_session: Session):
 
     # Check the response data
     data = response.json()
-    # Checking if the number of fields retrieved is 6
-    assert len(data) == 6
+    # Checking if the number of fields retrieved is 5
+    assert len(data) == 5
 
     # Clean up the test data from the database
     db_session.query(models.User).delete()
     db_session.commit()
+
+
+def test_get_current_user_information(test_client: TestClient, db_session: Session):
+    # Insert a test user into the database
+    user = models.User(email="test@example.com",
+                       password=get_password_hash("password"), name="Test User")
+    db_session.add(user)
+    db_session.commit()
+
+    # Send a request to the /token endpoint
+    response = test_client.post(
+        "/auth/token",
+        data={"username": "test@example.com", "password": "password"},
+    )
+
+    data = response.json()
+    # Check the response status code
+    assert response.status_code == status.HTTP_200_OK
+    assert "access_token" in data
+    access_token = data["access_token"]
+
+    # Send the request to /users/me endpoint with the access_token
+    response = test_client.get(
+        "/users/me", headers={"Authorization": f"Bearer {access_token}"})
+
+    data = response.json()
+    # Check the response status code
+    assert response.status_code == status.HTTP_200_OK
+    assert len(data) == 5

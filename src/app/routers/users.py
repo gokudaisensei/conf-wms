@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.data import schemas, models
-from app.dependencies import get_db, get_pagination_params
+from app.dependencies import get_current_user, get_db, get_pagination_params
 from sqlalchemy.orm import Session
+from typing import Annotated
 
 router = APIRouter(
     prefix='/users',
@@ -24,9 +25,17 @@ async def get_all_users_by_role(
             offset).limit(pagination['per_page']).all()
 
     if not users:
-        raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED, detail="Users not found.")
+        raise HTTPException(
+            status_code=status.HTTP_417_EXPECTATION_FAILED, detail="Users not found.")
 
     return [schemas.User.from_orm(user) for user in users]
+
+
+@router.get("/me", response_model=schemas.User)
+async def get_current_user_information(
+    current_user: Annotated[schemas.User, Depends(get_current_user)]
+):
+    return current_user
 
 
 @router.get('/{user_id}', response_model=schemas.User)

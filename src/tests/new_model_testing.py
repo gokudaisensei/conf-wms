@@ -57,6 +57,7 @@ coordinators = [_ for _ in session.query(User).filter(User.roleID == 3).all()]
 editors = [_ for _ in session.query(User).filter(User.roleID == 4).all()]
 associate = [_ for _ in session.query(User).filter(User.roleID == 5).all()]
 reviewers = [_ for _ in session.query(User).filter(User.roleID == 6).all()]
+authors = [_ for _ in session.query(User).filter(User.roleID == 7).all()]
 institutions = [_ for _ in session.query(Institution).all()]
 
 for admin, coordinator in zip(admins, coordinators):

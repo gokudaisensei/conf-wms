@@ -1,3 +1,5 @@
+from app.dependencies import get_password_hash
+
 ROLE_ENUM = {
     'SuperAdmin': 1,
     'Admin': 2,
@@ -14,7 +16,7 @@ def create_users(role: str, count: int) -> list[dict]:
         {
             'name': f'{role.capitalize()} {i}',
             'email': f'{role.lower()}{i}@example.com',
-            'password': f'password{i}',
+            'password': get_password_hash(f'password{i}'),
             'roleID': role
         } for i in range(1, count + 1)
     ]

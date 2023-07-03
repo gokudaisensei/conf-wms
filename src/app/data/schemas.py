@@ -3,6 +3,15 @@ from pydantic import BaseModel
 from enum import Enum
 
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str | None = None
+
+
 class MembershipEnum(str, Enum):
     Choice1 = 'Choice1'
     Choice2 = 'Choice2'
@@ -61,14 +70,13 @@ class Institution(InstitutionBase):
 
 class UserBase(BaseModel):
     name: str
-    password: str
     email: str
     roleID: Optional[RoleEnum]
     institution: Optional[Institution]
 
 
 class UserCreate(UserBase):
-    pass
+    password: str
 
 
 class UserUpdate(UserBase):
