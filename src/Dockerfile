@@ -1,4 +1,4 @@
-FROM python:3.11.0
+FROM python:3.11.0-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -13,20 +13,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     netcat \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Poetry
+RUN pip install poetry
+
 # Set work directory
 WORKDIR /usr/src/app
 
-# Copy requirements file and install dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
+# Copy pyproject.toml and poetry.lock
+COPY pyproject.toml poetry.lock* ./
+
+# Install project dependencies
+RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi
 
 # Make entrypoint script executable
-COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
+COPY ./scripts/prestart.sh ./scripts/prestart.sh
+RUN chmod +x ./scripts/prestart.sh
 
 # Copy the rest of the project
 COPY . .
 
 # Set entrypoint
-ENTRYPOINT [ "/usr/src/app/entrypoint.sh" ]
-
+ENTRYPOINT [ "/usr/src/app/scripts/prestart.sh" ]

@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.data import models
-from app.main import app
+from app.api.main import app
 
 # Create an in-memory SQLite database for testing
 engine = create_engine(os.getenv('TESTING_DATABASE_URL'))  # type: ignore

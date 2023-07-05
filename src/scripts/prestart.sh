@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# Wait for the database service to become available
-until nc -z db 3306; do
-  echo "Waiting for the database service to start..."
-  sleep 1
-done
+# Let the DB start
+python /usr/src/app/app/backend_pre_start.py
 
 # Check if there are any changes in the database schema
 check_output=$(alembic check)
@@ -22,5 +19,7 @@ else
   echo "No changes detected in the database schema."
 fi
 
-# Start the uvicorn server
-exec uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+# Create initial data in DB
+python /usr/src/app/app/initial_data.py
+
+exec uvicorn app.api.main:app --reload --workers 1 --host 0.0.0.0 --port 8000

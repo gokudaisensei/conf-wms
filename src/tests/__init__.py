@@ -1,4 +1,4 @@
-from app.dependencies import get_password_hash
+from app.api.deps import get_password_hash
 
 ROLE_ENUM = {
     'SuperAdmin': 1,

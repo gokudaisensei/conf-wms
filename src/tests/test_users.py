@@ -4,9 +4,9 @@ from fastapi.testclient import TestClient
 from fastapi import status
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from app.main import app
+from app.api.main import app
 from app.data import models, schemas
-from app.dependencies import get_db, get_password_hash
+from app.api.deps import get_db, get_password_hash
 from random import choice
 
 from tests import create_users, ROLE_ENUM

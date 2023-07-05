@@ -2,9 +2,9 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import  Session
 
-from app.main import app
+from app.api.main import app
 from app.data import models
-from app.dependencies import get_db, get_password_hash
+from app.api.deps import get_db, get_password_hash
 
 from tests.conftest import TestingSessionLocal, db_session, test_client
 
