@@ -17,6 +17,8 @@ services:
 
   db:
     image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=confstack
     volumes:
       - mysql_data:/var/lib/mysql
       - mysql_config:/etc/mysql
