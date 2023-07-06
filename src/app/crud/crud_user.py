@@ -9,10 +9,38 @@ from app.schemas.user import UserCreate, UserUpdate
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
+    """
+    CRUD operations for the User model.
+    """
+
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
+        """
+        Retrieves a user by their email.
+
+        #### Parameters
+
+        * `db`: The SQLAlchemy database session.
+        * `email`: The email of the user.
+
+        #### Returns
+
+        * An instance of the User model if found, otherwise None.
+        """
         return db.query(User).filter(User.email == email).first()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
+        """
+        Creates a new user.
+
+        #### Parameters
+
+        * `db`: The SQLAlchemy database session.
+        * `obj_in`: The input data for creating the user.
+
+        #### Returns
+
+        * An instance of the created User model.
+        """
         db_obj = User(
             name=obj_in.name,
             email=obj_in.email,
@@ -29,6 +57,19 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def update(
         self, db: Session, *, db_obj: User, obj_in: Union[UserUpdate, Dict[str, Any]]
     ) -> User:
+        """
+        Updates a user.
+
+        #### Parameters
+
+        * `db`: The SQLAlchemy database session.
+        * `db_obj`: The existing user object to be updated.
+        * `obj_in`: The input data for updating the user.
+
+        #### Returns
+
+        * An instance of the updated User model.
+        """
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
@@ -41,6 +82,19 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def authenticate(self, db: Session, *, email: str, password: str) -> Optional[User]:
+        """
+        Authenticates a user.
+
+        #### Parameters
+
+        * `db`: The SQLAlchemy database session.
+        * `email`: The email of the user.
+        * `password`: The password of the user.
+
+        #### Returns
+
+        * An instance of the authenticated User model if successful, otherwise None.
+        """
         user = self.get_by_email(db, email=email)
         if not user:
             return None
@@ -49,12 +103,44 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return user
 
     def is_active(self, user: User) -> bool:
+        """
+        Checks if a user is active.
+
+        #### Parameters
+
+        * `user`: The User instance.
+
+        #### Returns
+
+        * True if the user is active, False otherwise.
+        """
         return user.enabled
 
     def is_superuser(self, user: User) -> bool:
+        """
+        Checks if a user is a superuser.
+
+        #### Parameters
+
+        * `user`: The User instance.
+
+        #### Returns
+
+        * True if the user is a superuser, False otherwise."""
         return True if user.roleID == "SuperAdmin" else False
 
     def has_admin_privilege(self, user: User) -> bool:
+        """
+        Checks if a user has admin privileges.
+
+        #### Parameters
+
+        * `user`: The User instance.
+
+        #### Returns
+
+        * True if the user has admin privileges, False otherwise.
+        """
         return True if user.roleID in ("SuperAdmin", "Admin") else False
 
 

@@ -1,21 +1,6 @@
-import datetime
-from sqlalchemy import (
-    BigInteger,
-    Integer,
-    String,
-    Text,
-    Boolean,
-    DateTime,
-    ForeignKey,
-    Enum,
-    and_,
-)
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import BigInteger, String, Text, Enum
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy.ext.associationproxy import association_proxy
-from typing import List, Optional
 
 from app.db.base_class import Base
 

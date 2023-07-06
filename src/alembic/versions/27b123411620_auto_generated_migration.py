@@ -1,8 +1,8 @@
 """auto-generated migration
 
-Revision ID: f7012456cde5
+Revision ID: 27b123411620
 Revises: 
-Create Date: 2023-07-06 11:56:19.172234
+Create Date: 2023-07-06 13:21:59.864277
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f7012456cde5'
+revision = '27b123411620'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -30,9 +30,9 @@ def upgrade() -> None:
     )
     op.create_table('user',
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
-    sa.Column('hashed_password', sa.String(length=255), nullable=False),
+    sa.Column('hashed_password', sa.String(), nullable=False),
     sa.Column('roleID', sa.Enum('SuperAdmin', 'Admin', 'Coordinator', 'Editor', 'AssociateEditor', 'Reviewer', 'Author'), nullable=True),
     sa.Column('institution_id', sa.BigInteger(), nullable=True),
     sa.Column('enabled', sa.Boolean(), nullable=False),

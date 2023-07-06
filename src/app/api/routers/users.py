@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from pydantic import EmailStr
 from sqlalchemy.orm import Session
 from typing import Any, List
@@ -19,8 +19,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.get("/", response_model=List[schemas.User], summary="Retrieve users")
 def read_users(
     db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, gt=0),
     sadmin: models.User = Depends(get_current_active_superuser),
 ) -> Any:
     users = crud.user.get_multi(db, skip=skip, limit=limit)

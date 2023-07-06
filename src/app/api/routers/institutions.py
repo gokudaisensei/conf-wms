@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import Any, List
 
@@ -19,8 +19,8 @@ router = APIRouter(prefix="/institutions", tags=["institution"])
 def read_all_institution_details(
     *,
     db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, gt=0),
     superadmin: schemas.User = Depends(get_current_active_superuser),
 ) -> Any:
     institutions = crud.institution.get_multi(db, skip=skip, limit=limit)
