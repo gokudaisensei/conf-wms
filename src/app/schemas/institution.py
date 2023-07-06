@@ -11,19 +11,19 @@ class MembershipEnum(str, Enum):
 
 # Shared Properties
 class InstitutionBase(BaseModel):
-    institutionName: Optional[str] = None
-    institutionAddress: Optional[str] = None
+    name: Optional[str] = None
+    address: Optional[str] = None
     email: Optional[EmailStr] = None
-    contactNum: Optional[int] = None
+    contactno: Optional[int] = None
     membership: Optional[MembershipEnum] = None
 
 
 # Properties to recieve via API on creation
 class InstitutionCreate(InstitutionBase):
-    institutionName: str
-    institutionAddress: str
+    name: str
+    address: str
     email: EmailStr
-    contactNum: int
+    contactno: int
     membership: MembershipEnum
 
 

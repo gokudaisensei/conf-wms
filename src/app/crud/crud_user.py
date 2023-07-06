@@ -16,10 +16,10 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db_obj = User(
             name=obj_in.name,
             email=obj_in.email,
-            hashed_password=get_password_hash(obj_in.password),
+            hashed_password=get_password_hash(obj_in.password.get_secret_value()),
             roleID=obj_in.roleID,
             enabled=obj_in.enabled,
-            institution=obj_in.institution,
+            institution_id=obj_in.institution_id,
         )
         db.add(db_obj)
         db.commit()
@@ -32,6 +32,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
+            obj_in.password: str = obj_in.password.get_secret_value()
             update_data = obj_in.dict(exclude_unset=True)
         if update_data["password"]:
             hashed_password = get_password_hash(update_data["password"])
@@ -52,6 +53,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def is_superuser(self, user: User) -> bool:
         return True if user.roleID == "SuperAdmin" else False
+
+    def has_admin_privilege(self, user: User) -> bool:
+        return True if user.roleID in ("SuperAdmin", "Admin") else False
 
 
 user = CRUDUser(User)

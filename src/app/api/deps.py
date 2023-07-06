@@ -70,12 +70,33 @@ def get_current_user(
     return user
 
 
-def get_current_active_superuser(
+def get_current_active_user(
     current_user: models.User = Depends(get_current_user),
+) -> models.User:
+    if not crud.user.is_active(current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="This user is not activated"
+        )
+    return current_user
+
+
+def get_if_admin_privileges(
+    current_user: models.User = Depends(get_current_active_user),
+) -> models.User:
+    if not crud.user.has_admin_privilege(current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user doesn't have admin privileges",
+        )
+    return current_user
+
+
+def get_current_active_superuser(
+    current_user: models.User = Depends(get_current_active_user),
 ) -> models.User:
     if not crud.user.is_superuser(current_user):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The user doesn't have enough privileges",
+            detail="The user doesn't have super admin privileges",
         )
     return current_user

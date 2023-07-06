@@ -28,7 +28,7 @@ class User(Base):
             'Author'
         )
     )
-    institutionID: Mapped[Optional[int]] = mapped_column(BigInteger,
+    institution_id: Mapped[Optional[int]] = mapped_column(BigInteger,
                                                          ForeignKey(Institution.__tablename__ + ".id"))
     enabled: Mapped[bool] = mapped_column(default=False)
 
