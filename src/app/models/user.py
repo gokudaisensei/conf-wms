@@ -10,9 +10,9 @@ from app.db.base_class import Base
 
 class User(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(String(255))
     email: Mapped[str] = mapped_column(String(255), unique=True)
-    hashed_password: Mapped[str]
+    hashed_password: Mapped[str] = mapped_column(String(255))
     roleID: Mapped[Optional[Enum]] = mapped_column(
         Enum(
             "SuperAdmin",

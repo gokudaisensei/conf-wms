@@ -1,16 +1,22 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
-from fastapi import status
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from app.api.main import app
-from app.data import models, schemas
-from app.api.deps import get_db, get_password_hash
-from random import choice
 
-from tests import create_users, ROLE_ENUM
-from tests.conftest import db_session, test_client, TestingSessionLocal
+from sqlalchemy.orm import Session
+
+from app.api.main import app
+from app.core.security import create_access_token, get_password_hash
+from app.api.deps import get_db
+from app import crud
+from app import schemas
+from app.models import User
+
+from tests.conftest import (
+    db_session,
+    test_client,
+    setup_sadmin,
+    TestingSessionLocal,
+)
 
 
 def override_get_db():
@@ -24,111 +30,186 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 
-def test_get_all_users_by_role(test_client: TestClient, db_session: Session):
-    # Insert some test data into the database
-    user_count = 3
-    for role in ROLE_ENUM.keys():
-        users = create_users(role, count=user_count)
-        for user in users:
-            db_session.add(models.User(**user))
-        db_session.commit()
-
-    # Send a request to the API endpoint
-    response = test_client.get(
-        "/users", params={"role_name": 'Admin'})
-
-    # Check the response status code
-    assert response.status_code == 200
-
-    # Check the response data
-    data = response.json()
-    assert len(data) == user_count
-    assert data[0]["name"] == "Admin 1"
-    assert data[0]["roleID"] == "Admin"
-
-    # Clean up the test data from the database
-    db_session.query(models.User).delete()
+def test_read_users(
+    test_client: TestClient, db_session: Session, setup_sadmin: schemas.User
+):
+    # Create test users in the database
+    user1 = User(
+        name="User 1",
+        email="user1@example.com",
+        roleID="Admin",
+        hashed_password=get_password_hash("pwd1"),
+    )
+    user2 = User(
+        name="User 2",
+        email="user2@example.com",
+        roleID="Admin",
+        hashed_password=get_password_hash("pwd2"),
+    )
+    db_session.add(user1)
+    db_session.add(user2)
     db_session.commit()
 
+    access_token = create_access_token(setup_sadmin.id)
 
-def test_get_all_users_without_role(test_client: TestClient, db_session: Session):
-    # Insert some test data into the database
-    user_count = 3
-    for role in ROLE_ENUM.keys():
-        users = create_users(role, count=user_count)
-        for user in users:
-            db_session.add(models.User(**user))
-        db_session.commit()
-
-    # Send a request to the API endpoint
-    response = test_client.get(
-        "/users")
-
-    # Check the response status code
+    # Send a GET request to retrieve users
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = test_client.get("/users/", headers=headers)
     assert response.status_code == 200
 
-    # Check the response data
-    data = response.json()
-    # Using value 10 because of pagination limit per page by default is 10
-    assert len(data) == 10
-
-    # Clean up the test data from the database
-    db_session.query(models.User).delete()
-    db_session.commit()
+    # Check the response body for the retrieved users
+    users = response.json()
+    assert len(users) == 3
+    assert users[1]["name"] == "User 1"
+    assert users[2]["name"] == "User 2"
 
 
-def test_get_user_by_user_id(test_client: TestClient, db_session: Session):
-    # Insert some test data into the database
-    user_count = 3
-    for role in ROLE_ENUM.keys():
-        users = create_users(role, count=user_count)
-        for user in users:
-            db_session.add(models.User(**user))
-        db_session.commit()
+def test_create_user(
+    test_client: TestClient, db_session: Session, setup_sadmin: schemas.User
+):
+    # Create a user payload
+    user_payload = schemas.UserCreate(
+        name="New User",
+        email="newuser@example.com",
+        password="password",
+        roleID="Admin",
+    )
 
-    queried_user = choice(db_session.query(models.User).all())
-    test_user_id = queried_user.userID
+    access_token = create_access_token(setup_sadmin.id)
 
-    # Send a request to the API endpoint with the obtained userID
-    response = test_client.get(f'/users/{test_user_id}')
+    # Extract the password value
+    password = user_payload.password.get_secret_value()
+    user_payload_dict = user_payload.dict()
+    user_payload_dict["password"] = password
 
-    # Check the response status code
+    # Send a POST request to create a new user
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = test_client.post("/users/", json=user_payload_dict, headers=headers)
     assert response.status_code == 200
 
-    # Check the response data
-    data = response.json()
-    # Checking if the number of fields retrieved is 5
-    assert len(data) == 6
-
-    # Clean up the test data from the database
-    db_session.query(models.User).delete()
-    db_session.commit()
+    # Check the response body for the created user
+    created_user = response.json()
+    assert created_user["name"] == "New User"
+    assert created_user["email"] == "newuser@example.com"
 
 
 def test_get_current_user_information(test_client: TestClient, db_session: Session):
-    # Insert a test user into the database
-    user = models.User(email="test@example.com",
-                       password=get_password_hash("password"), name="Test User")
+    # Create a test user in the database
+    user = User(
+        name="Test User",
+        email="testuser@example.com",
+        roleID="Admin",
+        enabled=True,
+        hashed_password=get_password_hash("pwd1"),
+    )
     db_session.add(user)
     db_session.commit()
 
-    # Send a request to the /token endpoint
-    response = test_client.post(
-        "/auth/token",
-        data={"username": "test@example.com", "password": "password"},
+    # Generate a JWT token for the test user
+    access_token = create_access_token(user.id)
+
+    # Send a GET request to get the current user information
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = test_client.get("/users/me", headers=headers)
+    assert response.status_code == 200
+
+    # Check the response body for the current user information
+    current_user = response.json()
+    assert current_user["name"] == "Test User"
+    assert current_user["email"] == "testuser@example.com"
+
+
+def test_get_user_by_user_id(test_client: TestClient, db_session: Session):
+    # Create a test user in the database
+    user = User(
+        name="Test User",
+        email="testuser@example.com",
+        roleID="Admin",
+        enabled=True,
+        hashed_password=get_password_hash("pwd1"),
+    )
+    db_session.add(user)
+    db_session.commit()
+    access_token = create_access_token(user.id)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    # Send a GET request to get the user by ID
+    response = test_client.get(f"/users/{user.id}", headers=headers)
+    assert response.status_code == 200
+
+    # Check the response body for the retrieved user
+    retrieved_user = response.json()
+    assert retrieved_user["name"] == "Test User"
+    assert retrieved_user["email"] == "testuser@example.com"
+
+
+def test_update_user(test_client: TestClient, db_session: Session):
+    # Create a test user in the database
+    user = User(
+        name="Test User",
+        email="testuser@example.com",
+        roleID="Admin",
+        enabled=True,
+        hashed_password=get_password_hash("pwd1"),
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    # Create an update payload
+    update_payload = schemas.UserUpdate(
+        name="Updated User", email="updateduser@example.com"
     )
 
-    data = response.json()
-    # Check the response status code
-    assert response.status_code == status.HTTP_200_OK
-    assert "access_token" in data
-    access_token = data["access_token"]
+    access_token = create_access_token(user.id)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    # Send a PUT request to update the user
+    response = test_client.put(
+        f"/users/{user.id}", json=update_payload.dict(), headers=headers
+    )
+    assert response.status_code == 200
 
-    # Send the request to /users/me endpoint with the access_token
-    response = test_client.get(
-        "/users/me", headers={"Authorization": f"Bearer {access_token}"})
+    # Check the response body for the updated user
+    updated_user = response.json()
+    assert updated_user["name"] == "Updated User"
+    assert updated_user["email"] == "updateduser@example.com"
 
-    data = response.json()
-    # Check the response status code
-    assert response.status_code == status.HTTP_200_OK
-    assert len(data) == 6
+
+def test_delete_user_by_user_id(
+    test_client: TestClient, db_session: Session, setup_sadmin: schemas.User
+):
+    # Create a test user in the database
+    user = User(
+        name="Test User",
+        email="testuser@example.com",
+        roleID="Admin",
+        hashed_password=get_password_hash("pwd1"),
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    access_token = create_access_token(setup_sadmin.id)
+    # Send a DELETE request to delete the user by ID
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = test_client.delete(f"/users/{user.id}", headers=headers)
+    assert response.status_code == 200
+
+    # Check the response body for the success message
+    success_message = response.json()
+    assert success_message["message"] == f"User with ID '{user.id}' has been deleted"
+
+
+def test_create_user_open(test_client: TestClient, db_session: Session):
+    # Create a user payload
+    user_payload = {
+        "password": "password",
+        "email": "newuser@example.com",
+        "name": "New User",
+    }
+
+    # Send a POST request to create a new user without authentication
+    response = test_client.post("/users/open", json=user_payload)
+    assert response.status_code == 200
+
+    # Check the response body for the created user
+    created_user = response.json()
+    assert created_user["name"] == "New User"
+    assert created_user["email"] == "newuser@example.com"

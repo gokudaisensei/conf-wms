@@ -28,12 +28,12 @@ def read_users(
 
 
 @router.post("/", response_model=schemas.User, summary="Create new user")
-def create_user(
+async def create_user(
     user_in: schemas.UserCreate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_superuser),
 ) -> Any:
-    if crud.user.get_by_email(db, email=user_in.email) is not None:
+    if crud.user.get_by_email(db, email=user_in.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The user with this username already exists in the system.",
@@ -111,7 +111,7 @@ def create_user_open(
     password: str = Body(...),
     email: EmailStr = Body(...),
     name: str = Body(...),
-    institution_id: int = Body(...),
+    institution_id: int = Body(None),
     db: Session = Depends(get_db),
 ) -> Any:
     if not settings.USERS_OPEN_REGISTRATION:

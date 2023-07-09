@@ -43,7 +43,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         * An optional instance of the model if found, otherwise None.
         """
-        return db.query(self.model).filter(self.model.id == id).first()
+        return db.get(self.model, id)
 
     def get_multi(
         self, db: Session, *, skip: int = 0, limit: int = 100
@@ -129,7 +129,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         * The removed model instance if found, otherwise None.
         """
-        if not (obj := db.query(self.model).get(id)):
+        if not (obj := db.get(self.model, id)):
             return None
         db.delete(obj)
         db.commit()
