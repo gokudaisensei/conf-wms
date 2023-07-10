@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy import BigInteger, String, Text, Enum
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -11,4 +12,5 @@ class Institution(Base):
     address: Mapped[str] = mapped_column(Text, nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     contactno: Mapped[str] = mapped_column(String(10), nullable=False)
-    membership: Mapped[Enum] = mapped_column(Enum("Choice1", "Choice2"), nullable=False)
+
+    membership: Mapped[Optional[int]]

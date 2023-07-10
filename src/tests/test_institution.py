@@ -31,14 +31,12 @@ def test_read_all_institution_details(
             "address": "Address 1",
             "email": "institution1@example.com",
             "contactno": "1234567890",
-            "membership": "Choice1",
         },
         {
             "name": "Institution 2",
             "address": "Address 2",
             "email": "institution2@example.com",
             "contactno": "9876543210",
-            "membership": "Choice2",
         },
         # Add more institutions as needed
     ]
@@ -69,7 +67,6 @@ def test_create_institution(
         address="New Address",
         email="newemail@example.com",
         contactno="1234567890",
-        membership="Choice1",
     )
 
     access_token = create_access_token(setup_sadmin.id)
@@ -95,7 +92,6 @@ def test_get_current_institution_details(
         address="Test Address",
         email="testemail@example.com",
         contactno="9876543210",
-        membership="Choice2",
     )
     db_session.add(institution)
     db_session.commit()
@@ -133,7 +129,6 @@ def test_read_institution_by_id(
         address="Test Address",
         email="testemail@example.com",
         contactno="9876543210",
-        membership="Choice2",
     )
     db_session.add(institution)
     db_session.commit()
@@ -159,7 +154,6 @@ def test_update_institution(
         address="Test Address",
         email="testemail@example.com",
         contactno="9876543210",
-        membership="Choice2",
     )
     db_session.add(institution)
     db_session.commit()
@@ -170,7 +164,6 @@ def test_update_institution(
         address="Updated Address",
         email="updatedemail@example.com",
         contactno="1234567890",
-        membership="Choice1",
     )
 
     access_token = create_access_token(setup_sadmin.id)
@@ -196,7 +189,6 @@ def test_delete_institution(
         address="Test Address",
         email="testemail@example.com",
         contactno="9876543210",
-        membership="Choice2",
     )
     db_session.add(institution)
     db_session.commit()

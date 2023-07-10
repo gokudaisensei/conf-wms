@@ -1,12 +1,5 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr
-from enum import Enum
-
-
-# Enumeration of membership
-class MembershipEnum(str, Enum):
-    Choice1 = "Choice1"
-    Choice2 = "Choice2"
 
 
 # Shared Properties
@@ -15,7 +8,6 @@ class InstitutionBase(BaseModel):
     address: Optional[str] = None
     email: Optional[EmailStr] = None
     contactno: Optional[int] = None
-    membership: Optional[MembershipEnum] = None
 
 
 # Properties to recieve via API on creation
@@ -24,7 +16,6 @@ class InstitutionCreate(InstitutionBase):
     address: str
     email: EmailStr
     contactno: int
-    membership: MembershipEnum
 
 
 # Properties to update via API on creation
