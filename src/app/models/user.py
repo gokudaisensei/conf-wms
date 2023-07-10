@@ -12,8 +12,11 @@ class User(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(255))
     email: Mapped[str] = mapped_column(String(255), unique=True)
+    contactno: Mapped[str] = mapped_column(String(15), unique=True)
+    title: Mapped[Optional[Enum]] = mapped_column(Enum("Mr.", "Ms.", "Mrs.", "Dr."))
+    department: Mapped[Optional[str]] = mapped_column(String(255))
     hashed_password: Mapped[str] = mapped_column(String(255))
-    roleID: Mapped[Optional[Enum]] = mapped_column(
+    role: Mapped[Optional[Enum]] = mapped_column(
         Enum(
             "SuperAdmin",
             "Admin",

@@ -37,13 +37,15 @@ def test_read_users(
     user1 = User(
         name="User 1",
         email="user1@example.com",
-        roleID="Admin",
+        contactno="1234567890",
+        role="Admin",
         hashed_password=get_password_hash("pwd1"),
     )
     user2 = User(
         name="User 2",
         email="user2@example.com",
-        roleID="Admin",
+        contactno="2345678901",
+        role="Admin",
         hashed_password=get_password_hash("pwd2"),
     )
     db_session.add(user1)
@@ -71,8 +73,9 @@ def test_create_user(
     user_payload = schemas.UserCreate(
         name="New User",
         email="newuser@example.com",
+        contactno="1234567890",
         password="password",
-        roleID="Admin",
+        role="Admin",
     )
 
     access_token = create_access_token(setup_sadmin.id)
@@ -98,7 +101,8 @@ def test_get_current_user_information(test_client: TestClient, db_session: Sessi
     user = User(
         name="Test User",
         email="testuser@example.com",
-        roleID="Admin",
+        contactno="1234567890",
+        role="Admin",
         enabled=True,
         hashed_password=get_password_hash("pwd1"),
     )
@@ -124,7 +128,8 @@ def test_get_user_by_user_id(test_client: TestClient, db_session: Session):
     user = User(
         name="Test User",
         email="testuser@example.com",
-        roleID="Admin",
+        contactno="1234567890",
+        role="Admin",
         enabled=True,
         hashed_password=get_password_hash("pwd1"),
     )
@@ -142,12 +147,13 @@ def test_get_user_by_user_id(test_client: TestClient, db_session: Session):
     assert retrieved_user["email"] == "testuser@example.com"
 
 
-def test_update_user(test_client: TestClient, db_session: Session):
+def test_update_user(test_client: TestClient, db_session: Session, setup_sadmin: schemas.User):
     # Create a test user in the database
     user = User(
         name="Test User",
         email="testuser@example.com",
-        roleID="Admin",
+        contactno="1234567890",
+        role="Admin",
         enabled=True,
         hashed_password=get_password_hash("pwd1"),
     )
@@ -159,11 +165,11 @@ def test_update_user(test_client: TestClient, db_session: Session):
         name="Updated User", email="updateduser@example.com"
     )
 
-    access_token = create_access_token(user.id)
+    access_token = create_access_token(setup_sadmin.id)
     headers = {"Authorization": f"Bearer {access_token}"}
     # Send a PUT request to update the user
     response = test_client.put(
-        f"/users/{user.id}", json=update_payload.dict(), headers=headers
+        f"/users/{user.id}", json=update_payload.dict(exclude_unset=True), headers=headers
     )
     assert response.status_code == 200
 
@@ -180,7 +186,8 @@ def test_delete_user_by_user_id(
     user = User(
         name="Test User",
         email="testuser@example.com",
-        roleID="Admin",
+        contactno="1234567890",
+        role="Admin",
         hashed_password=get_password_hash("pwd1"),
     )
     db_session.add(user)
@@ -201,6 +208,7 @@ def test_create_user_open(test_client: TestClient, db_session: Session):
     # Create a user payload
     user_payload = {
         "password": "password",
+        "contactno": "1234567890",
         "email": "newuser@example.com",
         "name": "New User",
     }

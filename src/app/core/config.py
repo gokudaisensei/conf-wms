@@ -48,6 +48,7 @@ class Settings(BaseSettings):
 
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+    FIRST_SUPERUSER_CONTACT_NO: str
     USERS_OPEN_REGISTRATION: bool = True
 
     class Config:
