@@ -5,7 +5,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
 from app.db.base import Base
+from app.core.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -29,11 +31,7 @@ target_metadata = Base.metadata
 # ... etc.
 
 def get_url():
-    user = os.getenv("MYSQL_USER", "root")
-    password = os.getenv("MYSQL_PASSWORD", "root")
-    server = os.getenv("MYSQL_SERVER", "db")
-    db = os.getenv("MYSQL_DB", "confwms")
-    return f"mysql+pymysql://{user}:{password}@{server}/{db}"
+    return settings.SQLALCHEMY_DATABASE_URI
 
 
 def run_migrations_offline() -> None:

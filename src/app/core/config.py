@@ -9,12 +9,13 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
 
-    MYSQL_SERVER: str
-    MYSQL_PORT: str
-    MYSQL_USER: str
-    MYSQL_PASSWORD: str
-    MYSQL_DB: str
-    MYSQL_TEST_DB: str
+    DATABASE_SERVER: str
+    DATABASE_CONNECTION_SCHEME: str = "postgresql+psycopg2"
+    DATABASE_PORT: str
+    DATABASE_USER: str
+    DATABASE_PASSWORD: str
+    DATABASE_DB: str
+    DATABASE_TEST_DB: str
 
     SQLALCHEMY_DATABASE_URI: Optional[AnyUrl] = None
 
@@ -23,11 +24,11 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return v
         return AnyUrl.build(
-            scheme="mysql+pymysql",
-            user=values.get("MYSQL_USER"),
-            password=values.get("MYSQL_PASSWORD"),
-            host=values.get("MYSQL_SERVER"),
-            path=f"/{values.get('MYSQL_DB') or ''}",
+            scheme=values.get("DATABASE_CONNECTION_SCHEME"),
+            user=values.get("DATABASE_USER"),
+            password=values.get("DATABASE_PASSWORD"),
+            host=values.get("DATABASE_SERVER"),
+            path=f"/{values.get('DATABASE_DB') or ''}",
         )
 
     SQLALCHEMY_TEST_DATABASE_URI: Optional[AnyUrl] = None
@@ -39,11 +40,11 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return v
         return AnyUrl.build(
-            scheme="mysql+pymysql",
-            user=values.get("MYSQL_USER"),
-            password=values.get("MYSQL_PASSWORD"),
-            host=values.get("MYSQL_SERVER"),
-            path=f"/{values.get('MYSQL_TEST_DB') or ''}",
+            scheme=values.get("DATABASE_CONNECTION_SCHEME"),
+            user=values.get("DATABASE_USER"),
+            password=values.get("DATABASE_PASSWORD"),
+            host=values.get("DATABASE_SERVER"),
+            path=f"/{values.get('DATABASE_TEST_DB') or ''}",
         )
 
     FIRST_SUPERUSER: EmailStr
