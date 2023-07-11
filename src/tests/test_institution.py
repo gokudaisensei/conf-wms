@@ -99,8 +99,9 @@ def test_get_current_institution_details(
     user = User(
         name="Test User",
         email="testuseremail@example.com",
+        contactno="1234567890",
         hashed_password=get_password_hash("pwd1"),
-        roleID="Reviewer",
+        role="Reviewer",
         institution_id=institution.id,
         enabled=True,
     )
@@ -160,10 +161,7 @@ def test_update_institution(
 
     # Create an update payload
     update_payload = schemas.InstitutionUpdate(
-        name="Updated Institution",
-        address="Updated Address",
-        email="updatedemail@example.com",
-        contactno="1234567890",
+        name="Updated Institution"
     )
 
     access_token = create_access_token(setup_sadmin.id)
@@ -171,7 +169,7 @@ def test_update_institution(
     # Send a PUT request to update the institution
     headers = {"Authorization": f"Bearer {access_token}"}
     response = test_client.put(
-        f"/institutions/{institution.id}", json=update_payload.dict(), headers=headers
+        f"/institutions/{institution.id}", json=update_payload.dict(exclude_unset=True), headers=headers
     )
     assert response.status_code == 200
 

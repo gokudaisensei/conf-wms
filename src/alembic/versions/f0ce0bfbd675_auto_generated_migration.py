@@ -1,8 +1,8 @@
 """auto-generated migration
 
-Revision ID: 1c6096d807f1
+Revision ID: f0ce0bfbd675
 Revises: 
-Create Date: 2023-07-10 10:01:10.016935
+Create Date: 2023-07-10 17:03:03.197206
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1c6096d807f1'
+revision = 'f0ce0bfbd675'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -32,12 +32,16 @@ def upgrade() -> None:
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
+    sa.Column('contactno', sa.String(length=15), nullable=False),
+    sa.Column('title', sa.Enum('Mr.', 'Ms.', 'Mrs.', 'Dr.'), nullable=True),
+    sa.Column('department', sa.String(length=255), nullable=True),
     sa.Column('hashed_password', sa.String(length=255), nullable=False),
-    sa.Column('roleID', sa.Enum('SuperAdmin', 'Admin', 'Coordinator', 'Editor', 'AssociateEditor', 'Reviewer', 'Author'), nullable=True),
+    sa.Column('role', sa.Enum('SuperAdmin', 'Admin', 'Coordinator', 'Editor', 'AssociateEditor', 'Reviewer', 'Author'), nullable=True),
     sa.Column('institution_id', sa.BigInteger(), nullable=True),
     sa.Column('enabled', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['institution_id'], ['institution.id'], ),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('contactno'),
     sa.UniqueConstraint('email')
     )
     # ### end Alembic commands ###

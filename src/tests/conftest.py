@@ -10,7 +10,7 @@ from app.api.main import app
 from app.core.config import settings
 from app.db.init_db import init_db
 
-engine = create_engine(settings.SQLALCHEMY_TEST_DATABASE_URI)
+engine = create_engine(settings.SQLALCHEMY_TEST_DATABASE_URI, pool_pre_ping=True)
 TestingSessionLocal: Session = sessionmaker(
     autocommit=False, autoflush=False, bind=engine
 )

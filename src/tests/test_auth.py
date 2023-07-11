@@ -25,6 +25,7 @@ def test_login_for_access_token(test_client: TestClient, db_session: Session):
     # Insert a test user into the database
     user = models.User(
         email="test@example.com",
+        contactno="1234567890",
         hashed_password=get_password_hash("password"),
         name="Test User",
         enabled=True,

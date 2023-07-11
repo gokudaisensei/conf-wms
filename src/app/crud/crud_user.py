@@ -44,8 +44,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db_obj = User(
             name=obj_in.name,
             email=obj_in.email,
+            contactno=obj_in.contactno,
+            title=obj_in.title,
+            department=obj_in.department,
             hashed_password=get_password_hash(obj_in.password.get_secret_value()),
-            roleID=obj_in.roleID,
+            role=obj_in.role,
             enabled=obj_in.enabled,
             institution_id=obj_in.institution_id,
         )
@@ -128,7 +131,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         #### Returns
 
         * True if the user is a superuser, False otherwise."""
-        return True if user.roleID == "SuperAdmin" else False
+        return True if user.role == "SuperAdmin" else False
 
     def has_admin_privilege(self, user: User) -> bool:
         """
@@ -142,7 +145,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         * True if the user has admin privileges, False otherwise.
         """
-        return True if user.roleID in ("SuperAdmin", "Admin") else False
+        return True if user.role in ("SuperAdmin", "Admin") else False
 
 
 user = CRUDUser(User)

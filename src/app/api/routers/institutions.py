@@ -104,12 +104,12 @@ def update_institution(
     db: Session = Depends(get_db),
     admin: schemas.User = Depends(get_if_admin_privileges),
 ) -> Any:
-    if not (institution := crud.user.get(db, id=institution_id)):
+    if not (institution := crud.institution.get(db, id=institution_id)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="The user with this username does not exist in the system",
         )
-    institution_update = crud.user.update(db, db_obj=institution, obj_in=institution_in)
+    institution_update = crud.institution.update(db, db_obj=institution, obj_in=institution_in)
     return institution_update
 
 

@@ -5,6 +5,14 @@ from typing import Optional
 from app.schemas.institution import Institution
 
 
+# Enumeration of titles
+class TitleEnum(str, Enum):
+    mr = "Mr."
+    ms = "Ms."
+    mrs = "Mrs."
+    dr = "Dr."
+
+
 # Enumeration of roles
 class RoleEnum(str, Enum):
     SuperAdmin = "SuperAdmin"
@@ -18,9 +26,12 @@ class RoleEnum(str, Enum):
 
 # Shared properties
 class UserBase(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    roleID: Optional[RoleEnum] = None
+    name: Optional[str]
+    email: Optional[EmailStr]
+    contactno: Optional[str]
+    title: Optional[TitleEnum]
+    department: Optional[str]
+    role: Optional[RoleEnum]
     enabled: Optional[bool] = False
 
 
@@ -28,8 +39,9 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     name: str
     email: EmailStr
+    contactno: str
     password: SecretStr
-    institution_id: Optional[int] = None
+    institution_id: Optional[int]
 
 
 # Properties to update via API on creation

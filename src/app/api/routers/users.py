@@ -111,6 +111,9 @@ def create_user_open(
     password: str = Body(...),
     email: EmailStr = Body(...),
     name: str = Body(...),
+    contactno: str = Body(...),
+    title: schemas.TitleEnum = Body(None),
+    department: str = Body(None),
     institution_id: int = Body(None),
     db: Session = Depends(get_db),
 ) -> Any:
@@ -129,7 +132,10 @@ def create_user_open(
         password=password,
         email=email,
         name=name,
-        institutionID=institution_id,
+        contactno=contactno,
+        title=title,
+        department=department,
+        institution_id=institution_id,
         enabled=False,
     )
     user = crud.user.create(db, obj_in=user_in)
