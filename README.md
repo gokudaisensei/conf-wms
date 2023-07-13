@@ -13,7 +13,8 @@ cd conf-wms
 ```
 3. Build the image and make the container online.
 ```bash
-docker-compose up -d --build
+docker build -t <image_name> .
+docker run -p 8002:8000 --env-file .env -v $(pwd):/usr/src/app --name <container_name> <image_name>
 ```
 4. The FastAPI documentation is accessible at:
    1. [Swagger UI](http://localhost:8002/docs)
@@ -23,17 +24,11 @@ docker-compose up -d --build
 
 The logs can be viewed by running:
 ```bash
-docker-compose logs -f <service_name>
+docker logs <container_name> -f 
 ```
 
 ## Testing
 The tests can be run by running:
 ```bash
-docker-compose exec web bash
-pytest
-```
-This is for running the tests written for FastAPI. For accessing MySQL:
-```bash
-docker-compose exec db bash
-mysql -uroot -proot
+docker exec <container_name> pytest
 ```
