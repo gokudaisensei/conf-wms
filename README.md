@@ -3,7 +3,7 @@
 
 ## Setup
 
-Follow the below steps to setup and have the multi-part docker container running:
+Follow the below steps to setup and have the docker container running:
 
 1. Make sure Docker is installed.
 2. Clone the repo
