@@ -1,0 +1,7 @@
+.gitignore
+.gitattributes
+
+.vscode/
+
+**/__pycache__/**
+**/.pytest_cache/
