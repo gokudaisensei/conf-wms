@@ -33,4 +33,4 @@ RUN chmod +x ./scripts/prestart.sh
 COPY . .
 
 # Set entrypoint
-ENTRYPOINT [ "/usr/src/app/scripts/prestart.sh" ]
+ENTRYPOINT ["/bin/bash", "-c", "source /usr/src/app/.env && /bin/bash -c /usr/src/app/scripts/prestart.sh"]
