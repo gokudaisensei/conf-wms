@@ -22,5 +22,5 @@ fi
 # Create initial data in DB
 python /usr/src/app/app/initial_data.py
 
-exec uvicorn app.api.main:app --workers 4 --host 0.0.0.0 --port 8000
+exec uvicorn app.api.main:app --workers 2 --host 0.0.0.0 --port 8000
 
