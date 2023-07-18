@@ -32,5 +32,8 @@ RUN chmod +x ./scripts/prestart.sh
 # Copy the rest of the project
 COPY . .
 
+# Expose port at which uvicorn runs
+EXPOSE 8000
+
 # Set entrypoint
 ENTRYPOINT [ "/usr/src/app/scripts/prestart.sh" ]
